@@ -23,8 +23,10 @@ vc_ip = "10.114.200.6"
 vc_user = "administrator@vsphere.local"
 vc_pass = "myPassword!"
 
-nsx_tag = "IDS-IOC"
-nsx_scope = "isolate"
+nsx_tag = "IOC Type"
+nsx_scope = "IOC"
+nsx_sig = "4010637"
+
 
 def get_obj(content, vimtype, name):
     """
@@ -81,7 +83,7 @@ for result in vm_content['results']:
 
 # Retrieved affected VMs and process
 base_url = "https://" + nsx_ip + "/api/v1/intrusion-services/affected-vms"
-mydata = '{ "filters": [ { "field_names": "signature_detail.signature_id", "value": "(2010937)" } ] }'
+mydata = '{ "filters": [ { "field_names": "signature_detail.signature_id", "value": "'+ (nsx_sig +'" } ] }'
 json_object = json.loads(mydata)
 json_formatted_str = json.dumps(json_object, indent=2)
 response = post(base_url, mydata)
