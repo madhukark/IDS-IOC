@@ -122,16 +122,16 @@ def process_affected_vms_with_signatures(sig_list):
                                  ] } '
                     json_object = json.loads(mydata)
                     json_formatted_str = json.dumps(json_object, indent=2)
-        #            post (base_url, mydata)
+                    post (base_url, mydata)
 
             if (snapshot_workload):
                 print ("Taking a snapshot of VM: %s ..." % vm_name)
-        #        WaitForTask(vm.CreateSnapshot( "vm_name" + "_IDS_snapshot", "Snapshot by NSX IDS", False, False))
+                WaitForTask(vm.CreateSnapshot( "vm_name" + "_IDS_snapshot", "Snapshot by NSX IDS", False, False))
 
             if (shutdown_workload):
                 if vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOn:
                     print ("Powering off VM: %s ..." % vm_name)
-        #            WaitForTask(vm.PowerOff())
+                    WaitForTask(vm.PowerOff())
     return True
 
 
