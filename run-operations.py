@@ -26,7 +26,7 @@ vc_pass = "VMware1!"
 # Triggers
 individual_signatures = False
 signature_severity = True
-asset_tag_required = True
+asset_tag_required = False
 
 # Trigger Variables
 nsx_sig = ["4010637", "2013887"]
@@ -124,14 +124,14 @@ def process_affected_vms_with_signatures(sig_list):
                     json_formatted_str = json.dumps(json_object, indent=2)
                     post (base_url, mydata)
 
-            if (snapshot_workload):
-                print ("Taking a snapshot of VM: %s ..." % vm_name)
-                WaitForTask(vm.CreateSnapshot( "vm_name" + "_IDS_snapshot", "Snapshot by NSX IDS", False, False))
+                if (snapshot_workload):
+                    print ("Taking a snapshot of VM: %s ..." % vm_name)
+                    WaitForTask(vm.CreateSnapshot( "vm_name" + "_IDS_snapshot", "Snapshot by NSX IDS", False, False))
 
-            if (shutdown_workload):
-                if vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOn:
-                    print ("Powering off VM: %s ..." % vm_name)
-                    WaitForTask(vm.PowerOff())
+                if (shutdown_workload):
+                    if vm.runtime.powerState == vim.VirtualMachinePowerState.poweredOn:
+                        print ("Powering off VM: %s ..." % vm_name)
+                        WaitForTask(vm.PowerOff())
     return True
 
 
@@ -142,8 +142,23 @@ vm_content = response.json()
 vm_dict = {}
 vm_list = []
 for result in vm_content['results']:
+    vm_tag_list = []
     vm_dict[result['display_name']] = result['external_id']
-    vm_list.append(result['display_name'])
+    if (asset_tag_required):
+        if 'tags' in result.keys():
+            for t in  result['tags']:
+                if (t['tag'] == nsx_asset_value_tag and t['scope'] == nsx_asset_tag_scope):
+                    vm_list.append(result['display_name'])
+    else:
+        vm_list.append(result['display_name'])
+
+if (vm_list == []):
+    if (asset_tag_required):
+        print ("No VMs found with Asset Tag: %s and Scope %s" % (nsx_asset_value_tag, nsx_asset_tag_scope))
+    else:
+        print ("No VMs found in NSX Inventory. Nothing to do")
+    sys.exit(0)
+
 
 if (individual_signatures):
     process_affected_vms_with_signatures(nsx_sig)
